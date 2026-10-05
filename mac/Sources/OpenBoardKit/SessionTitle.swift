@@ -262,6 +262,9 @@ public enum SessionOrigin: String, Sendable, Equatable {
     /// Lower-cased because that is how cmux writes its own name, and a badge that
     /// renames someone's app is a small wrongness the reader has to look past.
     case cmux = "cmux"
+    /// The Code tab of the Claude desktop app. Reached by its own `claude://` link,
+    /// by the app's id for the session — see `Focus.openClaudeDesktopSession`.
+    case claudeDesktop = "Claude"
     case cli = "CLI"
 
     /// Decided from the entrypoint, then from which application actually owns the
@@ -273,6 +276,7 @@ public enum SessionOrigin: String, Sendable, Equatable {
         host: ProcessAncestry.Host = .unknown
     ) -> SessionOrigin {
         if entrypoint == "claude-vscode" { return .vscode }
+        if entrypoint == "claude-desktop" { return .claudeDesktop }
         // A tty is not enough. VS Code's integrated terminal allocates a real pty, so
         // a session there is indistinguishable from a Terminal tab by entrypoint and
         // tty alone — which is why this used to label it "Terminal" and then fail to
