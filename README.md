@@ -276,6 +276,13 @@ mac/tools/bootstrap.sh
 A build you signed yourself cannot update itself, so Check for Updates is hidden. See
 [CONTRIBUTING.md](CONTRIBUTING.md) for the development setup and how releases are cut.
 
+To pin a build to the exact source you reviewed — no update feed, no key, no scheduled
+check, so Sparkle is never started:
+
+```sh
+OB_NO_UPDATES=1 mac/tools/build-app.sh --release --install
+```
+
 ## Author
 
 OpenBoard is written and maintained by **Cam Wilson** — the app, the protocol work

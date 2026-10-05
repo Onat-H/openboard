@@ -26,6 +26,7 @@
 #   OB_VERSION    override the marketing version (default: nearest git tag)
 #   OB_BUILD      override the build number    (default: commit count)
 #   OB_IDENTITY   codesign identity to use     (default: best available, see below)
+#   OB_NO_UPDATES set to 1 for a build that never checks for updates (see below)
 
 set -eu
 
@@ -65,6 +66,19 @@ SPARKLE_PUBLIC_KEY=${OB_SPARKLE_PUBLIC_KEY:-"CqSaxWCpPony+XcxRwCq73cnQ/g/Mw3mlEK
 # install forever, so a release that goes out pointing at localhost is an install that
 # can never be updated again — see the note beside SUFeedURL below.
 FEED_URL=${OB_FEED_URL:-"https://updates.openboardapp.com/appcast.xml"}
+
+# A build pinned to the source it was made from: no key, no feed, no scheduled check.
+# For someone who reviewed this checkout and wants that to be what keeps running — the
+# app holds Input Monitoring and Accessibility, and an update inherits both.
+#
+# An empty key is what `Updater.isAvailable` reads, so Sparkle is never started at all
+# rather than started and told not to look.
+AUTO_CHECKS="<true/>"
+if [ "${OB_NO_UPDATES:-}" = "1" ]; then
+  SPARKLE_PUBLIC_KEY=""
+  FEED_URL=""
+  AUTO_CHECKS="<false/>"
+fi
 
 # Sparkle refuses a plain-HTTP feed unless the updates themselves are signed, which
 # ours are — but macOS App Transport Security blocks the request before Sparkle sees
@@ -271,7 +285,7 @@ cat > "$APP/Contents/Info.plist" <<PLIST
 $ATS_EXCEPTION
   <key>SUPublicEDKey</key>
   <string>$SPARKLE_PUBLIC_KEY</string>
-  <key>SUEnableAutomaticChecks</key>    <true/>
+  <key>SUEnableAutomaticChecks</key>    $AUTO_CHECKS
   <key>SUScheduledCheckInterval</key>   <integer>86400</integer>
 
   <key>OBSourceStamp</key>              <string>$STAMP</string>
